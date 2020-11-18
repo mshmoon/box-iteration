@@ -325,7 +325,7 @@ class Box:
                     freeCenter.append([m,n])
         return freeCenter
 
-    def kMeans(self,centerArray,scoreMat):
+    def meanSift(self,centerArray,scoreMat):
         epoch=20
         Flag=True
         for n in range(epoch):
@@ -387,5 +387,5 @@ if __name__=="__main__":
     initCenter=objBox.initCenter()
     plotDemo(initCenter)
     time.sleep(3)
-    totalIndex=objBox.kMeans(initCenter,totalScoreBox)
+    totalIndex=objBox.meanSift(initCenter,totalScoreBox)
     #generateVideo()

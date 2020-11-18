@@ -1,4 +1,7 @@
 # box-iteration
+
+![image](https://github.com/mshmoon/box-iteration/blob/main/result/show-result.gif)
+
 This project aims to solve the problem that rectangles do not intersect in a certain space.
 
 First, the project simulates the attributes in the space and each rectangle, and then iterates according to the similarity of attributes.
@@ -11,3 +14,5 @@ The concrete iterative method uses the idea of mean IFT to search the optimal va
 
 Dependency package:
 pip install -r requriements.txt
+
+

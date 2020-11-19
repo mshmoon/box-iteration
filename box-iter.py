@@ -15,11 +15,12 @@ sun=100
 view=100
 noise=100
 
-count=0
 S=10
+count=0
+colorSet=([255,0,255],[255,0,255],[255,255,255],[255,255,255],[125,125,125],[255,0,255],[255,255,255])
 
 def plotDemo(totalIndex):
-    #              H   W  C
+    # H   W  C
     global count
 
     if not os.path.exists("./image"):
@@ -38,32 +39,11 @@ def plotDemo(totalIndex):
             x,y=mK[j]//objBox.rowNum,mK[j]%objBox.rowNum
             mBox = objBox.decodingBox(x,y,j)
             mBox=[x*S for x in mBox[0]]
-            if j == 0:
-                # 白色
-                color = (255, 0, 255)
-            if j == 1:
-                # 灰色
-                color = (255, 0, 255)
-            if j == 2:
-                # 粉红色
-                color = (255, 255, 255)
-            if j == 3:
-                #
-                color = (255, 255, 255)
-            if j == 4:
-                #
-                color = (125, 125, 125)
-            if j == 5:
-                color = (255, 0, 255)
-            if j == 6:
-                color = (255, 255, 255)
+            color=colorSet[j]
             cv.rectangle(img=img, pt1=(int(mBox[1]), int(mBox[0])), pt2=(int(mBox[3]), int(mBox[2])),color=color, thickness=20)
-        #img = cv.transpose(img)
         for j, item in enumerate(mK):
             x, y = item // objBox.rowNum, item % objBox.rowNum
-            #cv.circle(img, (x * S, y * S), 1, color, thickness=20)
             cv.circle(img, (y * 10, x * 10), 1, color, thickness=20)
-        #cv.imwrite("./image/"+str(count)+".png", img)
         cv.imwrite("./image/" + str(0) + ".png", img)
         count += 1
 
@@ -248,7 +228,6 @@ class Box:
             tempList1=list(set(tempList0))
             tempList1.sort(key=tempList0.index)
             totalList.append(tempList1)
-
         for i,item0 in enumerate(totalList):
             tempList = []
             tempList.extend(item0)
@@ -259,7 +238,6 @@ class Box:
                     if set(tempList)==item2:
                         pass
         return distMat
-
 
     def updateCenterScore(self,centerArray,boxBoundary,meanVal,ioutMat,meanIoU,boxTh,flag):
         updateCenter=np.zeros((self.boxNum,1,2))
@@ -338,7 +316,6 @@ class Box:
             centerArray=self.updateCenterScore(centerArray,boxBoundary,meanVal,iouMat,meanIoU,n,flag=Flag)
             plotDemo(centerArray)
         freeCenter=self.gloablAdj(centerArray,boxBoundary,meanVal,iouMat,meanIoU,n,flag=Flag)
-
         # plotDemo(centerArray)
         return freeCenter
     def showScoreMat(self,boxAtt,spacePointAtt):
@@ -367,7 +344,6 @@ def generateVideo():
             video.write(img)
     video.release()
     cv.destroyAllWindows()
-
 
 if __name__=="__main__":
     import argparse

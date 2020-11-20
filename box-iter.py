@@ -20,7 +20,6 @@ count=0
 colorSet=([255,0,255],[255,0,255],[255,255,255],[255,255,255],[125,125,125],[255,0,255],[255,255,255])
 
 def plotDemo(totalIndex):
-    # H   W  C
     global count
 
     if not os.path.exists("./image"):
@@ -122,7 +121,6 @@ class Box:
             leftUpX, leftUpY, = centerX - boxWidth // self.step // 2, centerY - boxHeight // self.step // 2
             rightDownX, rightDownY = centerX + boxWidth // self.step // 2, centerY + boxHeight // self.step // 2
             boxBoundary.append([leftUpX,leftUpY,rightDownX,rightDownY])
-        #矢量方向
         return boxBoundary
 
     def decodingBox(self,center_x,center_y,i):
@@ -135,7 +133,6 @@ class Box:
         return boxList
 
     def calcuIOU(self, box1, box2):
-
         iou = 0
         xmin1, ymin1, xmax1, ymax1 = box1[0]
         for item in box2:
@@ -153,7 +150,6 @@ class Box:
 
             area = w * h
             iou += area / (s1 + s2 - area)
-
         return iou
 
     def boxIoU(self,centerArray,boxBoundary):

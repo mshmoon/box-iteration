@@ -7,21 +7,18 @@ import time
 import cv2 as cv
 import numpy as np
 
-W=150*10
-H=130*10
-bigBox=(0,0,W,H)
-
+S=10
+count=0
 sun=100
 view=100
 noise=100
-
-S=10
-count=0
+W=150*10
+H=130*10
+bigBox=(0,0,W,H)
 colorSet=([255,0,255],[255,0,255],[255,255,255],[255,255,255],[125,125,125],[255,0,255],[255,255,255])
 
 def plotDemo(totalIndex):
     global count
-
     if not os.path.exists("./image"):
         os.mkdir(("./image"))
     img=np.zeros((W,H,3))
@@ -31,7 +28,6 @@ def plotDemo(totalIndex):
         t = item[0][0] * objBox.rowNum + item[0][1]
         temp.append(int(t))
     totalIndex = [temp]
-
     for i,mK in enumerate(totalIndex):
         img = cv.imread("img.png")
         for j,box in enumerate(objBox.box):
@@ -56,7 +52,6 @@ class Box:
         self.boxNum=boxNum
         self.factor=factor
         self.solutionNum=solution
-
         self.centerPointIndex = None
         self.currentBox = None
         self.tempKeyList = None
@@ -75,20 +70,21 @@ class Box:
 
     def processBox(self):
         boxAtt = np.array(
-           [[1.0, 0.2, 0.0],
+           [
+            [1.0, 0.2, 0.0],
             [0.5, 0.2, 0.0],
             [0.5, 0.2, 0.0],
             [1.0, 0.2, 0.0],
             [0.5, 0.5, 0.0],
             [0.2, 1.0, 0.0],
-            [0.2, 1.0, 0.0]]
+            [0.2, 1.0, 0.0]
+           ]
         )
         return boxAtt
 
     def processSpace(self):
         spacePointAtt = np.zeros((self.rowNum * self.colNum, self.factor))
         funcList=[self.calcuIll,self.calcuNoise,self. calcuView]
-
         for i in range(self.rowNum):
             for j in range(self.colNum):
                 for numFactor in range(self.factor):
@@ -106,7 +102,6 @@ class Box:
         centerArray=np.zeros((self.boxNum,1,2))
         for i,box in enumerate(self.box):
             width,height=box[0]/self.step/2,box[1]/self.step/2
-
             centerArray[i][0][0], centerArray[i][0][1] = np.random.randint(width - 1, self.rowNum - width,
                                                                            1), np.random.randint(height - 1,
                                                                                                  self.colNum- height, 1)
@@ -139,32 +134,27 @@ class Box:
             xmin2, ymin2, xmax2, ymax2 = item[0]
             s1 = (xmax1 - xmin1) * (ymax1 - ymin1)
             s2 = (xmax2 - xmin2) * (ymax2 - ymin2)
-
             xmin = max(xmin1, xmin2)
             ymin = max(ymin1, ymin2)
             xmax = min(xmax1, xmax2)
             ymax = min(ymax1, ymax2)
-
             w = max(0, xmax - xmin)
             h = max(0, ymax - ymin)
-
             area = w * h
             iou += area / (s1 + s2 - area)
         return iou
 
     def boxIoU(self,centerArray,boxBoundary):
+        step=2
         iouMat=np.zeros((self.boxNum,self.rowNum,self.colNum))
         for i, center in enumerate(centerArray):
-
             boxX, boxY = self.box[i][0] // self.step // 2, self.box[i][1] // self.step // 2
             x=int(center[0][0])
             y=int(center[0][1])
-            step=2
             lowY = y-step*boxY
             highY = y+step*boxY
             lowX = x-step*boxX
             highX = x+step*boxX
-           
             for j in range(lowX, highX, 1):
                     for k in range(lowY, highY, 1):
                         if j>=boxX and j<=self.rowNum-boxX and k>=boxY and k<=self.colNum-boxY:
@@ -185,7 +175,6 @@ class Box:
         meanVal=[]
         meanIoU=[]
         for i,center in enumerate(centerArray):
-
             if iouMat is None:
                 tempX = int(centerArray[i][0][0])
                 tempY = int(centerArray[i][0][1])
@@ -203,18 +192,19 @@ class Box:
     def calcuDist(self,centerArray):
         self.adjMat = np.array(
             [
-                [0, -1, 1, 1, -1, -1, -1],
-                [-1, 0, 1, 1, -1, -1, -1],
-                [1, 1, 0, 1, -1, -1, -1],
-                [1, 1, 1, 0, 1, -1, -1],
-                [-1, -1, -1, 1, 0, 1, 1],
-                [-1, -1, -1, -1, 1, 0, 1],
-                [-1, -1, -1, -1, 1, 1, 0],
+                [ 0, -1,  1,  1, -1, -1, -1],
+                [-1,  0,  1,  1, -1, -1, -1],
+                [ 1,  1,  0,  1, -1, -1, -1],
+                [ 1,  1,  1,  0,  1, -1, -1],
+                [-1, -1, -1,  1,  0,  1,  1],
+                [-1, -1, -1, -1,  1,  0,  1],
+                [-1, -1, -1, -1,  1,  1,  0],
             ]
         )
+
+        totalList=[]
         self.adjMat[self.adjMat == -1] = 00
         distMat=np.zeros((self.boxNum,1))
-        totalList=[]
         for i ,arr in enumerate(self.adjMat):
             tempList0=[]
             for j,ele in enumerate(arr):
@@ -230,27 +220,24 @@ class Box:
             for j,item1 in enumerate(totalList):
                 tempList.extend(item1)
                 for k,item2 in enumerate(totalList):
-
                     if set(tempList)==item2:
                         pass
         return distMat
 
     def updateCenterScore(self,centerArray,boxBoundary,meanVal,ioutMat,meanIoU,boxTh,flag):
-        updateCenter=np.zeros((self.boxNum,1,2))
+        step=2
         self.IOU=0
+        updateCenter=np.zeros((self.boxNum,1,2))
         for i, center in enumerate(centerArray):
             if flag==True:
                 if boxTh % self.boxNum != i:
                     updateCenter[i][0][0] = centerArray[i][0][0]
                     updateCenter[i][0][1] = centerArray[i][0][1]
                     continue
-
             x = int(center[0][0])
             y = int(center[0][1])
-
             iou,error, coor, score,dist= 0, 100, [x,y],[],[]
             boxX, boxY = self.box[i][0] // self.step // 2, self.box[i][1] // self.step // 2
-            step=2
             lowY = y -  step*boxY
             highY = y +  step*boxY
             lowX = x -  step*boxX
@@ -260,7 +247,6 @@ class Box:
                     if j >= boxX and j <= self.rowNum - boxX and k >= boxY and k <= self.colNum - boxY:
                         tempError = meanVal[i] - totalScoreBox[i][j][k]
                         tempIoU = meanIoU[i] - ioutMat[i][j][k]
-
                         if flag==True:
                             # 此处必须<=和>=
                             if tempError <= error and tempIoU>= iou:
@@ -286,7 +272,6 @@ class Box:
             x1,y1,x2,y2=boundingBox[0][0],boundingBox[0][1],boundingBox[0][2],boundingBox[0][3]
             boxX1Y1X2Y2.append([x1,y1,x2,y2])
         freeCenter=[]
-
         for m in range(self.space[0]//self.step):
             for n in range(self.space[1]//self.step):
                 flag=True
@@ -312,8 +297,8 @@ class Box:
             centerArray=self.updateCenterScore(centerArray,boxBoundary,meanVal,iouMat,meanIoU,n,flag=Flag)
             plotDemo(centerArray)
         freeCenter=self.gloablAdj(centerArray,boxBoundary,meanVal,iouMat,meanIoU,n,flag=Flag)
-        # plotDemo(centerArray)
         return freeCenter
+
     def showScoreMat(self,boxAtt,spacePointAtt):
         """
         :function:可调用显示每个box得分矩阵
@@ -327,10 +312,10 @@ def generateVideo():
     """
     :function:生成结果用于动画展示
     """
-    path = "./image/"
-    filelist = os.listdir(path)
     fps = 4
     size = (400, 400)
+    path = "./image/"
+    filelist = os.listdir(path)
     video = cv.VideoWriter("video.avi", cv.VideoWriter_fourcc('I', '4', '2', '0'), fps, size)
     for item in filelist:
         if item.endswith(".png"):
@@ -343,15 +328,12 @@ def generateVideo():
 
 if __name__=="__main__":
     import argparse
-
     parser = argparse.ArgumentParser(description='space')
     args = parser.parse_args()
-
     space=(W,H)
     box = ((120 * 10, 50 * 10),(36 * 10, 28 * 10), (40 * 10, 38 * 10), (30 * 10, 16 * 10), (30 * 10, 18 * 10), (70 * 10, 72 * 10),
            (20 * 10, 16 * 10),)
     boxNum=np.shape(box)[0]
-
     objBox=Box(space,box,solution=200,boxNum=len(box),factor=3)
     boxAtt=objBox.processBox()
     spacePointAtt=objBox.processSpace()
